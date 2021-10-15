@@ -1,3 +1,9 @@
+variable "server_port" {
+  description = "The port the server will use for HTTP requests"
+  type        = number
+  default     = 8080
+}
+
 provider "aws" {
   region = "us-east-1"
 }
@@ -11,9 +17,8 @@ resource "aws_instance" "web_server" {    # "<PROVIDER>_<TYPE>" "<NAME>"
   vpc_security_group_ids = [aws_security_group.my_SG_webserver.id]
   user_data              = <<EOF
 #!/bin/bash
-#myip = 'curl http://169.254.169.254/latest/meta-data/local_ipv4'
-#echo "Hello, World $myip" > index.html
-echo "Hello, World" > index.html
+myip='curl http://169.254.169.254/latest/meta-data/local-ipv4'
+echo "Hello World? IP: $myip " > index.html
 nohup busybox httpd -f -p 8080 &
 EOF
 
@@ -25,9 +30,10 @@ resource "aws_security_group" "my_SG_webserver" {
   #vpc_id      = aws_vpc.main.id
 
   ingress {
+
     #      description      = "TLS from VPC"
-    from_port   = 8080
-    to_port     = 8080
+    from_port   = var.server_port
+    to_port     = var.server_port
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
     #      ipv6_cidr_blocks = [aws_vpc.main.ipv6_cidr_block]
