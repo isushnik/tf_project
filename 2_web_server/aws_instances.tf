@@ -11,7 +11,8 @@ resource "aws_instance" "web_server" {    # "<PROVIDER>_<TYPE>" "<NAME>"
   vpc_security_group_ids = [aws_security_group.my_SG_webserver.id]
   user_data              = <<EOF
 #!/bin/bash
-# myip = 'curl http://172.31.23.8/latest/meta-data/local_ipv4'
+#myip = 'curl http://169.254.169.254/latest/meta-data/local_ipv4'
+#echo "Hello, World $myip" > index.html
 echo "Hello, World" > index.html
 nohup busybox httpd -f -p 8080 &
 EOF
