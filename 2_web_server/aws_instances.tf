@@ -83,5 +83,5 @@ output "security_group_name" {
 }
 
 output "web_server_ingress" {
-  value = aws_security_group.my_SG_webserver.ingress(0)
+  value = aws_security_group.my_SG_webserver.ingress
 }
