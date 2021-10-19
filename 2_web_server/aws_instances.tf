@@ -1,7 +1,7 @@
 variable "server_port" {
   description = "The port the server will use for HTTP requests"
   type        = number
-  #default     = 8080
+  default     = 8080
 }
 
 provider "aws" {
@@ -61,4 +61,21 @@ resource "aws_security_group" "my_SG_webserver" {
   tags = {
     Name = "SG_webserver"
   }
+}
+
+output "public_ip" {
+  value       = aws_instance.web_server.public_ip
+  description = "The public IP address of the web server"
+}
+
+output "web_server_id" {
+  value = aws_instance.web_server.id
+}
+
+output "security_group_name" {
+  value = aws_security_group.my_SG_webserver.name
+}
+
+output "web_server_ingress" {
+  value = aws_security_group.my_SG_webserver.ingress
 }
