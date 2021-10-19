@@ -14,11 +14,15 @@ resource "aws_instance" "web_server" {    # "<PROVIDER>_<TYPE>" "<NAME>"
   tags = {
   Name = "Web_server" }
 
+  lifecycle {
+    create_before_destroy = true
+  }
+
   vpc_security_group_ids = [aws_security_group.my_SG_webserver.id]
   user_data              = <<EOF
 #!/bin/bash
 myip='curl http://169.254.169.254/latest/meta-data/local-ipv4'
-echo "Hello World? IP: $myip " > index.html
+echo "Hello World? My IP: $myip " > index.html
 nohup busybox httpd -f -p 8080 &
 EOF
 
@@ -57,11 +61,13 @@ resource "aws_security_group" "my_SG_webserver" {
     #      ipv6_cidr_blocks = ["::/0"]
   }
 
-
   tags = {
     Name = "SG_webserver"
   }
 }
+
+
+
 
 output "public_ip" {
   value       = aws_instance.web_server.public_ip
@@ -77,5 +83,5 @@ output "security_group_name" {
 }
 
 output "web_server_ingress" {
-  value = aws_security_group.my_SG_webserver.ingress
+  value = aws_security_group.my_SG_webserver.ingress(0)
 }
