@@ -4,7 +4,7 @@ variable "count_server" {
 }
 
 provider "aws" {
-  region = "us-east-2"
+  region = "us-east-1"
 }
 
 data "aws_ami" "latest_amazon_linux" {
