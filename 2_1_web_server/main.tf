@@ -1,7 +1,9 @@
 provider "aws" {
   region = "us-east-2"
-}
 
+  # Allow any 2.x version of the AWS provider
+  #  version = "~> 2.0"
+}
 
 
 variable "server_port" {
@@ -9,7 +11,7 @@ variable "server_port" {
   type        = number
   default     = 8080
 }
-/*
+
 variable "alb_name" {
   description = "The name of the ALB"
   type        = string
@@ -27,7 +29,7 @@ variable "alb_security_group_name" {
   type        = string
   default     = "terraform-example-alb"
 }
-*/
+
 
 resource "aws_launch_configuration" "example" {
   image_id        = "ami-0c55b159cbfafe1f0"
@@ -50,16 +52,18 @@ resource "aws_autoscaling_group" "example" {
   target_group_arns    = [aws_lb_target_group.asg.arn]
   health_check_type    = "ELB"
   min_size             = 2
-  max_size             = 10
+  max_size             = 3
   tag {
     key                 = "Name"
-    value               = "terraform-asgexample"
+    value               = "terraform-asg-example"
     propagate_at_launch = true
   }
 }
 
 
 resource "aws_security_group" "instance" {
+
+  #name = var.instance_security_group_name
   name = "terraform-example-instance"
   ingress {
     from_port   = 8080
@@ -82,6 +86,7 @@ data "aws_subnet_ids" "default" {
 
 
 resource "aws_lb" "example" {
+  #name = var.alb_name
   name               = "terraform-asg-example"
   load_balancer_type = "application"
   subnets            = data.aws_subnet_ids.default.ids
@@ -108,6 +113,7 @@ resource "aws_lb_listener" "http" {
 
 
 resource "aws_lb_target_group" "asg" {
+  #name = var.alb_name
   name     = "terraform-asg-example"
   port     = var.server_port
   protocol = "HTTP"
@@ -140,6 +146,8 @@ resource "aws_lb_listener_rule" "asg" {
 
 
 resource "aws_security_group" "alb" {
+
+  #name = var.alb_security_group_name
   name = "terraform-example-alb"
   # Разрешаем все входящие HTTP-запросы
   ingress {
