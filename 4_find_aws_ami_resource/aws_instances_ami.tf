@@ -3,8 +3,30 @@ variable "count_server" {
   default = 1
 }
 
+variable "region" {
+  description = "Please Enter AWS Region"
+  type        = string
+  default     = "us-east-2" # US East (Ohio)us-east-2
+}
+
+variable "allow_ports" {
+  description = "List of ports to open server"
+  type        = list(any)
+  default     = ["80", "8080", "443", "22"]
+}
+
+variable "common_tags" {
+  description = "Common tags to apply to all resource"
+  type        = map(any)
+  default = {
+    Owner       = "isushnik"
+    Project     = "Phoenix"
+    Environment = "Development"
+  }
+}
+
 provider "aws" {
-  region = "us-east-1"
+  region = var.region
 }
 
 data "aws_ami" "latest_amazon_linux" {
@@ -22,8 +44,7 @@ resource "aws_instance" "serv_amazon_linux" {
   ami           = data.aws_ami.latest_amazon_linux.id
   count         = var.count_server
   instance_type = "t2.micro"
-  tags = {
-  Name = "serv_amazon_linux" }
+  tags          = merge(var.common_tags, { Name = "${var.common_tags["Environment"]} Server_amazon_linux" }) # Development Server_amazon_linux
 
   vpc_security_group_ids = [aws_security_group.SG_amazon_linux.id]
 
@@ -39,15 +60,15 @@ resource "aws_security_group" "SG_amazon_linux" {
   description = "SG_amazon_linux"
   #vpc_id      = aws_vpc.main.id
 
-
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-    #      ipv6_cidr_blocks = [aws_vpc.main.ipv6_cidr_block]
+  dynamic "ingress" {
+    for_each = var.allow_ports
+    content {
+      from_port   = ingress.value
+      to_port     = ingress.value
+      protocol    = "tcp"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
   }
-
 
   egress {
     from_port   = 0
@@ -56,10 +77,8 @@ resource "aws_security_group" "SG_amazon_linux" {
     cidr_blocks = ["0.0.0.0/0"]
     #      ipv6_cidr_blocks = ["::/0"]
   }
+  tags = merge(var.common_tags, { Name = "SG_amazon_linux" })
 
-  tags = {
-    Name = "SG_amazon_linux"
-  }
 }
 
 
