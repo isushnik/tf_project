@@ -20,8 +20,8 @@ resource "aws_eip" "my_static_ip" {
     Name  = "Static IP"
     owner = var.owner
     #region             = local.reg
-    #availability_zones = local.avz
-    fpn = local.full_project_name
+    availability_zones = local.avz
+    fpn                = local.full_project_name
 
   }
 
