@@ -26,10 +26,28 @@ variable "count_srv" {
   default = "1"
 }
 
+# ----------------------------server1------------------------------
+# --------------------- count , for -------------------------------
+
+
 resource "aws_instance" "server1" {
+  count         = 1
   ami           = "ami-074cce78125f09d61"
   instance_type = var.env == "prod" ? var.ec2_size["prod"] : var.ec2_size["dev"]
+  tags = {
+    Name = "Server_${count.index + 1} "
+  }
 }
+
+output "aws_instance_name" {
+  value = {
+    for s in aws_instance.server1 :
+    s.id => s.public_ip
+  }
+}
+
+
+# -----------------------aws_security_group------------------
 
 resource "aws_security_group" "SG_amazon_linux" {
   name        = "SG_amazon_linux"
@@ -56,7 +74,7 @@ resource "aws_security_group" "SG_amazon_linux" {
 }
 
 
-# ненужный ресурс с произвольным именем
+# ------------------ ненужный ресурс с произвольным именем
 resource "random_string" "random_name_instance" {
   length = 8
   #special = False
@@ -75,12 +93,14 @@ resource "aws_instance" "random_name_instance" {
 }
 
 
-# ненужный ресурс с произвольным кол-вом серверов
+# ------------ненужный ресурс с произвольным кол-вом серверов
 resource "random_integer" "count_server" {
   min = 1
   max = 5
 }
 
+
+# -----------------------------output-----------------------------
 output "random_name_instance" {
   value = random_string.random_name_instance.result
 }
